@@ -1,18 +1,21 @@
 import express from 'express';
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-
-puppeteer.use(StealthPlugin());
+import puppeteer from 'puppeteer-core';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/test-browser', async (req, res) => {
+app.get('/test-real-browser', async (req, res) => {
   try {
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium',
+      executablePath: '/usr/bin/chromium-browser', // المتصفح الموجود
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox', 
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process'
+      ]
     });
     
     const page = await browser.newPage();
@@ -23,7 +26,7 @@ app.get('/test-browser', async (req, res) => {
     res.json({ 
       success: true, 
       title: title,
-      message: '✅ Browser automation working with puppeteer-core!'
+      message: '✅ Real browser is working!' 
     });
   } catch (error) {
     res.json({ 
