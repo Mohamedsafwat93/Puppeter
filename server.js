@@ -1,55 +1,34 @@
 import express from 'express';
-import { chromium } from 'playwright';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+puppeteer.use(StealthPlugin());
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.json({
-    status: '🚀 Server with Playwright!',
-    phase: 'Testing lightweight browser automation', 
-    timestamp: new Date().toISOString()
-  });
-});
-
-// 🔥 أضف هذا الـ endpoint الجديد
 app.get('/test-browser', async (req, res) => {
-  console.log('🧪 Testing browser automation...');
-  
   try {
-    const browser = await chromium.launch({ 
+    const browser = await puppeteer.launch({
+      executablePath: '/usr/bin/chromium',
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
     
     const page = await browser.newPage();
-    
-    // اختبار فتح موقع
     await page.goto('https://example.com');
     const title = await page.title();
-    
     await browser.close();
-    
-    console.log('✅ Browser test successful!');
     
     res.json({ 
       success: true, 
       title: title,
-      message: '✅ Browser automation is working!'
+      message: '✅ Browser automation working with puppeteer-core!'
     });
-    
   } catch (error) {
-    console.log('❌ Browser test failed:', error.message);
-    
     res.json({ 
       success: false, 
-      error: error.message,
-      message: '❌ Browser automation failed'
+      error: error.message 
     });
   }
-});
-
-app.listen(PORT, () => {
-  console.log('✅ Server with Playwright started on port', PORT);
-  console.log('🔗 Test browser at: /test-browser');
 });
